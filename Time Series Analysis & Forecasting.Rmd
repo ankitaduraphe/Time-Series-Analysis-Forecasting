@@ -1,0 +1,315 @@
+---
+title: "Time Series Analysis & Forecasting"
+author: "18BCE1104 - Ankita Duraphe"
+date: "11/02/2021"
+output:
+  word_document: default
+  pdf_document: default
+  html_document:
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+---
+
+### Forecasting on sample data
+
+* * *
+highest Petrol price in every month from 2018 to yesterday
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+data_vector = c(75.63, 76.12, 76.29, 77.47, 81.47, 81.32, 79.8, 81.63, 86.8, 87.39, 82.51, 75.34,74.03, 74.43, 75.65, 75.96, 75.9, 74.39, 76.29, 75.65, 77.34, 77.56, 77.763, 78.1, 79.04, 76.01, 74.79, 72.37, 75.78, 83.63, 83.67, 85.05, 85.09, 84.19, 85.31, 86.51, 88.8, 89.68)
+```
+
+* * * 
+converting vector to dataset
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+data_forecasting = ts(data_vector, start=c(2018,1), end=c(2021,2), frequency=12)
+```
+
+* * * 
+importance of splitting automatically
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+start(data_forecasting)
+end(data_forecasting)
+frequency(data_forecasting)
+cycle(data_forecasting)
+summary(data_forecasting)
+```
+
+* * * 
+Analysis PART: plotting the series
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+plot(data_forecasting)
+```
+
+* * * 
+regression
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+plot(data_forecasting)
+abline(reg=lm(data_forecasting~time(data_forecasting)), col="blue")
+```
+
+* * * 
+month-wise (range and mean) plot 
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+monthplot(data_forecasting)
+```
+
+* * * 
+year-wise mean plot
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+plot(aggregate(data_forecasting,FUN=mean))
+```
+
+* * * 
+month-wise box plot
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+boxplot(data_forecasting~cycle(data_forecasting))
+```
+
+* * *
+Load the required packages
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+library(fabletools)
+library(ggplot2)
+library(forecast)
+library(ggfortify)
+```
+
+* * * 
+visualisation
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+decompose_fc = decompose(data_forecasting,"multiplicative")
+autoplot(decompose_fc)
+```
+
+* * * 
+FORECASTING / PREDICTING
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+library(forecast)
+```
+
+* * * 
+Monthwise predicting
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+seasonplot(data_forecasting)
+```
+
+* * * 
+Autocorrelation and Partial Autocorrelation plots
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+acf(data_forecasting)   #for MA - Q
+pacf(data_forecasting, lag=length(data_forecasting),pl=TRUE) # for AR - P
+```
+
+* * * 
+ARIMA
+
+AR (P - autoregressive lags) + I (d - order of differentiation) + MA (Q - moving average) \
+correlation between previous time period with current \
+noise | averaging / smoothing
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+fit_arima = arima(data_forecasting, order=c(3, 2, 2))
+accuracy(fit_arima)        
+newdata_arima = forecast(fit_arima, 4)
+plot(newdata_arima)
+```
+
+* * * 
+**MFE: Mean Forecast Error or ME: Mean Error (for forecast)**
+
+From accuracy(fit_arima), MFE or ME = 0.01807052 
+
+* * * 
+**MAD: Mean Absolute Deviation or MAE: Mean Absolute Error**
+
+From accuracy(fit_arima), MAD or MAE = 1.632346 
+
+* * * 
+Auto ARIMA 
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+fit_autoarima = auto.arima(data_forecasting)
+accuracy(fit_autoarima)
+newdata_autoarima = forecast(fit_autoarima, 4)
+plot(newdata_autoarima)
+```
+
+* * * 
+**MFE: Mean Forecast Error or ME: Mean Error (for forecast)**
+
+From accuracy(fit_autoarima), MFE or ME = 0.3113201  
+
+* * * 
+**MAD: Mean Absolute Deviation or MAE: Mean Absolute Error**
+
+From accuracy(fit_autoarima), MAD or MAE = 1.679884 
+
+### Forecasting for Weather History dataset
+
+* * * 
+Load the required packages
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+library(ggplot2)
+library(dplyr)
+```
+
+* * * 
+Read the dataset
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+data <- read.csv("weatherHistory.csv")
+```
+
+* * * 
+View the dataset
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+View(data)
+```
+
+* * * 
+Converting To Time Series object using ts() function: For Weekly data
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+weather_forecasting = ts(data$Humidity, start=c(2006,1,4), end=c(2016,9,9), frequency=7)
+```
+
+* * * 
+importance of spliting automatically
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+start(weather_forecasting)
+end(weather_forecasting)
+frequency(weather_forecasting)
+cycle(weather_forecasting)
+summary(weather_forecasting)
+```
+
+* * * 
+Analysis PART: plotting the series
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+plot(weather_forecasting)
+```
+
+* * * 
+regression
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+plot(weather_forecasting)
+abline(reg=lm(weather_forecasting~time(weather_forecasting)), col="blue")
+```
+
+* * * 
+month-wise (range and mean) plot 
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+monthplot(weather_forecasting)
+```
+
+* * * 
+year-wise mean plot
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+plot(aggregate(weather_forecasting,FUN=mean))
+```
+
+* * * 
+month-wise box plot
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+boxplot(weather_forecasting~cycle(weather_forecasting))
+```
+
+* * * 
+visualisation
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+decompose_fc = decompose(weather_forecasting,"multiplicative")
+autoplot(decompose_fc)
+```
+
+* * * 
+FORECASTING / PREDICTING
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+library(forecast)
+```
+
+* * * 
+Monthwise predicting
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+seasonplot(weather_forecasting)
+```
+
+* * * 
+Autocorrelation and Partial Autocorrelation plots
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+acf(weather_forecasting)   #for MA - Q
+pacf(weather_forecasting, lag=length(weather_forecasting),pl=TRUE) # for AR - P
+```
+
+* * * 
+ARIMA
+
+AR (P - autoregressive lags) + I (d - order of differentiation) + MA (Q - moving average) \
+correlation between previous time period with current \
+noise | averaging / smoothing
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+fit_arima = arima(weather_forecasting, order=c(3, 2, 2))
+accuracy(fit_arima)        
+newdata_arima = forecast(fit_arima, 4)
+plot(newdata_arima)
+```
+
+* * * 
+**MFE: Mean Forecast Error or ME: Mean Error (for forecast)**
+
+From accuracy(fit_arima), MFE or ME = 0.00494041   
+
+* * * 
+**MAD: Mean Absolute Deviation or MAE: Mean Absolute Error**
+
+From accuracy(fit_arima), MAD or MAE = 0.04667016  
+
+* * * 
+Auto ARIMA 
+
+```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+fit_autoarima = auto.arima(weather_forecasting)
+accuracy(fit_autoarima)
+newdata_autoarima = forecast(fit_autoarima, 4)
+plot(newdata_autoarima)
+```
+
+* * * 
+**MFE: Mean Forecast Error or ME: Mean Error (for forecast)**
+
+From accuracy(fit_autoarima), MFE or ME = 0.0005175949    
+
+* * * 
+**MAD: Mean Absolute Deviation or MAE: Mean Absolute Error**
+
+From accuracy(fit_autoarima), MAD or MAE = 0.04887203 
+
+* * *
+**Conclusion:** \
+Forecasting, including MFE & MAD, has been successfully performed on sample data as well as on weatherHistory dataset.
